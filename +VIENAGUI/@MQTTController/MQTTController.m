@@ -47,7 +47,11 @@ classdef MQTTController < mqttio.Mqtt
         EPOS_state
         EPOS_connected
         EPOS_PID
-        EPOS_t
+        EPOS_target_position
+        EPOS_position
+        EPOS_angle
+        EPOS_MAX_FOLLOWING_ERROR
+        EPOS_EMCY
         
         %CAN
         CAN_connected
