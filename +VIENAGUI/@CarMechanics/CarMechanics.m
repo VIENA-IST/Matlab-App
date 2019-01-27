@@ -24,48 +24,105 @@
 classdef CarMechanics
     %CARMECHANICS car model to simulate its driving
     
-    properties
-        motor = VIENAGUI.InductionMotor;
-    end
+    %--------------------------------------------------------------------------
+    %-PROPERTIES---------------------------------------------------------------
+    %--------------------------------------------------------------------------
     
-%--------------------------------------------------------------------------
-%-PROPERTIES---------------------------------------------------------------
-%--------------------------------------------------------------------------
+    properties (SetAccess = private)
+        %Drive Course
+        roadCircuit
+        roadAngle
+        roadAngleTime_
+        roadIncline
+        roadInclineTime_
+        targetVelocity
+        targetVelocityTime_
+        maxTime
+        
+    end
     
     properties (Constant)
         %Car Properties (FIAT Seicento)
         carMass = 700; %[kg]
-        length = 3.337 %[m]
+        wheelBase = 2.200 %[m]
         frontArea = 1.508*1.420;  %[m^2]
         
         %Wheel
         wheelMass = 3; %[kg]
         wheelRadius = 0.28; %[m]
-        wheelInertia = 1/2 * wheelMass * wheelRadius^2; %[Kg m^2]
-        rollFriction = 0.01; 
+        
+        rollFriction = 0.01;
         cornerStiff = 60; %not used
         
         %Air Drag
         dragCoeff = 0.33;
-%         airTemperature = 273; %[K]
-%         airPressure = 101325; %[Pa]
-%         airSpecificGasConst = 287.058; %[J kg^-1 K^-1]
-%         airDensity = airPressure/(airSpecificGasConst*airTemperature); %[kg m^-3]
         airDensity = 1.2930; %[kg m^-3]
+        %         airTemperature = 273; %[K]
+        %         airPressure = 101325; %[Pa]
+        %         airSpecificGasConst = 287.058; %[J kg^-1 K^-1]
+        %         airDensity = airPressure/(airSpecificGasConst*airTemperature); %[kg m^-3]
+        
+        %Motor
+        motor = VIENAGUI.InductionMachine;
     end
     
+    properties (Dependent)
+       wheelInertia
+    end
+    
+    %--------------------------------------------------------------------------
+    %-METHODS------------------------------------------------------------------
+    %--------------------------------------------------------------------------
+    
     methods
-        function obj = untitled(inputArg1,inputArg2)
-            %UNTITLED Construct an instance of this class
-            %   Detailed explanation goes here
-            obj.Property1 = inputArg1 + inputArg2;
+        %Constructor
+        function newCarMech = CarMechanics()
+            newCarMech.maxTime = 300;
+            newCarMech.roadAngle = [0 0 3 3 0 0 3 3]*pi/180;
+            newCarMech.roadAngleTime_ = [0 0.1 0.101 0.5 0.501 0.8 0.801 1]*newCarMech.maxTime;
+            newCarMech.roadIncline = [0 0]*pi/180;
+            newCarMech.roadInclineTime_ = [0 1]* newCarMech.maxTime;
+            newCarMech.targetVelocity = [0 500 500 1000 -1000 -500 0];
+            newCarMech.targetVelocityTime_ = [0 0.1 0.3 0.4 0.6 0.7 1] * newCarMech.maxTime;
         end
         
-        function outputArg = method1(obj,inputArg)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
-            outputArg = obj.Property1 + inputArg;
+        function wheelInertia = get.wheelInertia(newCarMech)
+            wheelInertia = 1/2 * newCarMech.wheelMass * newCarMech.wheelRadius^2; %[Kg m^2]
+        end
+        
+        function simulate(newCarMech)
+            
+            maxTime = newCarMech.maxTime;
+            t_sample = 1;
+            
+            roadAngle = newCarMech.roadAngle;
+            roadAngleTime_ = newCarMech.roadAngleTime_;
+            
+            roadIncline = newCarMech.roadIncline;
+            roadInclineTime_ = newCarMech.roadInclineTime_;
+            
+            targetVelocity = newCarMech.targetVelocity;
+            targetVelocityTime_ = newCarMech.targetVelocityTime_;
+            
+            Motor = newCarMech.motor;
+            
+            wheelBase = newCarMech.wheelBase %[m]
+            frontArea = newCarMech.frontArea;  %[m^2]
+            
+            %Wheel
+            wheelMass = newCarMech.wheelMass; %[kg]
+            wheelRadius = newCarMech.wheelRadius; %[m]
+            wheelInertia = newCarMech.wheelInertia; %[Kg m^2]
+            rollFriction = newCarMech.rollFriction;
+            cornerStiff = newCarMech.cornerStiff; %not used
+            
+            %Air Drag
+            dragCoeff = newCarMech.dragCoeff;
+            airDensity = newCarMech.airDensity; %[kg m^-2]
+            
+            VoF = 1;
+            
+            sim('full_model_car.slx');
         end
     end
-end
-
+end   

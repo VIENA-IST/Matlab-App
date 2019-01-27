@@ -534,7 +534,77 @@ classdef InductionMachine
             appValues = [solutions,rotorSpeed'];
         end
 %-------END-GETVALUES4APP--------------------------------------------------
-        
+
+%-------DEBUGEQSOLUTIONS----------------------------------------------------
+        function solution = Debug_EQSolutions(newIM,voltage,frequency,rotorSpeed)
+        %Calculations using equivalent circuit (ADAPTED FROM ALEXANDRE MONTEIRO'S WORK)
+            %check if EQCircuit exists
+            fieldsIM = fieldnames(newIM);
+            assert(any(ismember(fieldsIM,'EQCircuit')),...
+                'equivalent circuit parameters are needed (missing EQCircuit structure')
+            %check if operationValues are not empty and are numeric
+            assert(all(isnumeric([voltage frequency rotorSpeed])),...
+                'Operation Values are not numeric.')
+            %if frequency is zero, the solutions are 0
+            if frequency == 0
+                solution = zeros(1,7);
+                return
+            end
+            %make calculations
+            angFreq = 2*pi*frequency;
+            statorFreq = frequency*60/newIM.polePair;
+            slip = (statorFreq - rotorSpeed)/(statorFreq);
+            eqvC = newIM.EQCircuit;
+            % eqvC(1) == Rs 
+            % eqvC(2) == Ls
+            % eqvC(3) == RM
+            % eqvC(4) == LM
+            % eqvC(5) == Rr
+            % eqvC(6) == Lr
+            %Compute Z Matrix of the EQCircuit
+            % U = ZI
+            % U = [Us Us  0]
+            % I = [Is IM Ir]
+            % Z = [Zs ZM  0
+            %      Zs  0 Zr
+            %      -1  1  1]
+            Zs = eqvC(1)+1j*angFreq*eqvC(2);
+            %check if RM exists or not
+            if eqvC(3) == inf
+                Zm = 1j*angFreq*eqvC(4);
+            else
+                Z1 = 1j*angFreq*eqvC(4);
+                Z2 = eqvC(3);
+                Zm = (Z1*Z2)/(Z1+Z2);
+            end
+            switch slip
+                % no load condition
+                case 0
+                    U = voltage/sqrt(3);
+                    Z = Zs + Zm;
+                    I = [Z\U;Z\U;0];
+%                     outputPower = 0;
+%                     Torque= 0;
+                otherwise
+                    U = [voltage voltage 0]/sqrt(3);
+                    Zr = eqvC(5)/slip+1j*angFreq*eqvC(6);
+                    Z = [Zs     Zm      0;
+                         Zs     0       Zr;
+                         -1     1       1];
+                    I = Z\U';
+%                     outputPower = 3*(abs(I(3))^2)*eqvC(5)*(1-slip)/slip;
+%                     Torque = 3*(abs(I(3))^2)*eqvC(5)/(slip*(angFreq/newIM.polePair));
+            end
+%             inputPower = real(3*U(1)*conj(I(1)));
+%             efficiency = outputPower/inputPower;
+            solution = [I(1),...    %Is
+                        I(2),...    %IM
+                        I(3),...    %Ir
+                        I(2)*Zm,... %Um
+                        U-I(2)*Zm]; %Urs
+        end
+%-------END-DEBUGEQSOLUTIONS-----------------------------------------------
+
     end
 %--------------------------------------------------------------------------
 %-PRIVATE METHODS----------------------------------------------------------
