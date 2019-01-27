@@ -347,14 +347,8 @@ classdef InductionMachine
 
 %-------EQSOLUTIONS--------------------------------------------------------
         function solution = EQSolutions(newIM,voltage,frequency,rotorSpeed)
-        %Calculations using equivalent circuit (ADAPTED FROM ALEXANDRE MONTEIRO'S WORK)
-            %check if EQCircuit exists
-            fieldsIM = fieldnames(newIM);
-            assert(any(ismember(fieldsIM,'EQCircuit')),...
-                'equivalent circuit parameters are needed (missing EQCircuit structure')
-            %check if operationValues are not empty and are numeric
-            assert(all(isnumeric([voltage frequency rotorSpeed])),...
-                'Operation Values are not numeric.')
+%         %Calculations using equivalent circuit (ADAPTED FROM ALEXANDRE MONTEIRO'S WORK)
+
             %if frequency is zero, the solutions are 0
             if frequency == 0
                 solution = zeros(1,7);
@@ -387,21 +381,22 @@ classdef InductionMachine
                 Z2 = eqvC(3);
                 Zm = (Z1*Z2)/(Z1+Z2);
             end
+            
+            U = voltage/sqrt(3);
             switch slip
                 % no load condition
                 case 0
-                    U = voltage/sqrt(3);
                     Z = Zs + Zm;
-                    I = [Z\U;Z\U;0];
+                    I = [U/Z;U/Z;0];
                     outputPower = 0;
                     Torque= 0;
                 otherwise
-                    U = [voltage voltage 0]/sqrt(3);
                     Zr = eqvC(5)/slip+1j*angFreq*eqvC(6);
-                    Z = [Zs     Zm      0;
-                         Zs     0       Zr;
-                         -1     1       1];
-                    I = Z\U';
+                    Zeq = Zs + (Zr*Zm)/(Zr+Zm);
+                    Is = U/Zeq;
+                    Ir = (U-Zs*(U/Zeq))/Zr;
+                    Im = (U-Zs*(U/Zeq))/Zm;
+                    I = [Is;Im;Ir];
                     outputPower = 3*(abs(I(3))^2)*eqvC(5)*(1-slip)/slip;
                     Torque = 3*(abs(I(3))^2)*eqvC(5)/(slip*(angFreq/newIM.polePair));
             end
@@ -536,7 +531,7 @@ classdef InductionMachine
 %-------END-GETVALUES4APP--------------------------------------------------
 
 %-------DEBUGEQSOLUTIONS----------------------------------------------------
-        function solution = Debug_EQSolutions(newIM,voltage,frequency,rotorSpeed)
+        function solution = debug_EQSolutions(newIM,voltage,frequency,rotorSpeed)
         %Calculations using equivalent circuit (ADAPTED FROM ALEXANDRE MONTEIRO'S WORK)
             %check if EQCircuit exists
             fieldsIM = fieldnames(newIM);

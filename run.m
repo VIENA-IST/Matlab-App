@@ -49,6 +49,11 @@ v_t=[0 0.1 0.3 0.4 0.6 0.7 1]*t_max;
 
 % sim('model_1.slx')
 
+motor = VIENAGUI.InductionMachine;
+
+EQSolutions = @(v,f,r) motor.EQSolutions(v,f,r);
+
+%%
 sim('full_model_car.slx')
 
 

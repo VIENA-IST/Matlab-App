@@ -106,7 +106,7 @@ classdef CarMechanics
             
             Motor = newCarMech.motor;
             
-            wheelBase = newCarMech.wheelBase %[m]
+            wheelBase = newCarMech.wheelBase; %[m]
             frontArea = newCarMech.frontArea;  %[m^2]
             
             %Wheel
