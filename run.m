@@ -38,8 +38,8 @@ Fz=m*g;
 t_max=300;
 t_sample=1;
 
-theta_v=[5 5]*pi/180;
-theta_t=[0 1]*t_max;
+theta_v=[0    0     5 5]*pi/180;
+theta_t=[0 0.03 0.031 1]*t_max;
 
 v_v=5000*[0 0.5 1]; % rpm
 v_t=[0 0.1 1]*t_max;
@@ -50,7 +50,7 @@ EQSolutions = @(v,f,r) motor.EQSolutions(v,f,r);
 
 %% follow path
 % global steering;
-steering = SteeringController();
+steering = VIENAGUI.SteeringController();
 steering.create_map();
 
 % starting point of car
