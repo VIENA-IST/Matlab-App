@@ -8,11 +8,11 @@ g=9.81;
 pp=2;
 V_F=1; % V/f ratio
 
-% Modelo FIAT Cinquencento
+% Modelo FIAT Cinquecento
 Cd=0.33; % FIAT Cinquecento wikipedia https://en.wikipedia.org/wiki/Fiat_Cinquecento
 A= 1.508*1.420; % area from wikipedia
 m=700+2*70; %peso do carro + 2 pessoas
-rw=0.28;
+rw=0.1651;
 Izz=1/2*m*(3.23/2)^2;
 lf=3.23/2;
 lr=3.23/2;
@@ -38,35 +38,39 @@ Fz=m*g;
 t_max=300;
 t_sample=1;
 
-alfa_v=1*[0 0 3 3 0 0 3 3]*pi/180;
-alfa_t=[0 0.1 0.101 0.5 0.501 0.8 0.801 1]*t_max;
-
-theta_v=[0 0]*pi/180;
+theta_v=[5 5]*pi/180;
 theta_t=[0 1]*t_max;
 
-v_v=1*[0 500 500 1000 -1000 -500 0];
-v_t=[0 0.1 0.3 0.4 0.6 0.7 1]*t_max;
-
-% sim('model_1.slx')
+v_v=5000*[0 0.5 1]; % rpm
+v_t=[0 0.1 1]*t_max;
 
 motor = VIENAGUI.InductionMachine;
 
 EQSolutions = @(v,f,r) motor.EQSolutions(v,f,r);
 
-%%
-sim('full_model_car.slx')
+%% follow path
+% global steering;
+steering = SteeringController();
+steering.create_map();
 
+% starting point of car
+car = steering.map_points(1,:) + 2*rand(1,2);
+
+figure(1)
+[x0, y0]=ginput(1);
+plot(x0,y0,'r+')
+[x2, y2]=ginput(1);
+psi0 = atan2(-(x2-x0),(y2-y0));
+
+endpoint = steering.map_points(end,:);
+dt=0.1;
+steering.sampling_time = dt;
+wheel_base = 2.2;
+wheel_angle = 0;
 
 %%
-figure
-plot(x_v0.Data,y_v0.Data)
-axis equal
+sim('viena_model_R2017b_v2.slx')
+
 hold on
-h3=plot(x_v0.Data(2,1),y_v0.Data(2,1),'ro');
+plot(x_v0.Data,y_v0.Data)
 
-for i=1:length(x_v0.time)
-    h3.XData=x_v0.Data(i);
-    h3.YData=y_v0.Data(i);
-    drawnow
-    pause(0.05)
-end
