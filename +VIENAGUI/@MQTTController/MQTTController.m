@@ -53,6 +53,22 @@ classdef MQTTController < mqttio.Mqtt
         EPOS_MAX_FOLLOWING_ERROR
         EPOS_EMCY
         
+        %BATTERY
+        BATTERY_TS
+        BATTERY_cell_voltage_highest
+        BATTERY_cell_voltege_averege
+        BATTERY_cell_voltage_lowest
+        BATTERY_charge_SOC
+        BATTERY_charge_voltage
+        BATTERY_charge_current
+        BATTERY_cell_temp_highest
+        BATTERY_cell_temp_averege
+        BATTERY_cell_temp_lowest
+        BATTERY_energy_current_mode
+        BATTERY_energy_balancing_rate
+        BATTERY_slave_temp_highest_uP
+        BATTERY_slave_temp_highest_load
+        
         %CAN
         CAN_connected
         
