@@ -1,3 +1,9 @@
 [submodule "+VIENAGUI/@SteeringController"]
 	path = +VIENAGUI/@SteeringController
 	url = https://github.com/brtiberio/SteeringController.git
+[submodule "+VIENAGUI/@CreateMap"]
+	path = +VIENAGUI/@CreateMap
+	url = https://github.com/brtiberio/CreateMap.git
+[submodule "+VIENAGUI/@CarPlotter"]
+	path = +VIENAGUI/@CarPlotter
+	url = https://github.com/brtiberio/CarPlotter.git
